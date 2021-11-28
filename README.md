@@ -65,7 +65,7 @@ spec:
         - name: aad-proxy
           image: mac2000/aad-proxy
           env:
-            - name: AAD_CLIEN_ID
+            - name: AAD_CLIENT_ID
               value: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
             - name: AAD_CLIEN_SECRET
               value: xxxxx~xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -77,6 +77,8 @@ spec:
             - name: AAD_COOKIE_DOMAIN
               # put partent domain name here
               value: mac-blog.org.ua
+            - name: AAD_COOKIE_NAME
+              value: aad
           ports:
             - containerPort: 8080
 ---

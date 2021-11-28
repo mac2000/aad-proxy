@@ -12,6 +12,13 @@
 #   nginx.ingress.kubernetes.io/auth-signin: "https://aad.mac-blog.org.ua/login"
 #   nginx.ingress.kubernetes.io/auth-cache-key: $cookie_aad
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: aad-proxy-tls
+# Placeholder, used only for further kubectl delete -f kube.yml to delete secret also
+type: Opaque
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -33,17 +40,17 @@ spec:
           image: mac2000/aad-proxy
           env:
             - name: AAD_CLIENT_ID
-              value: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+              value: 3a61a550-0f87-49e5-8511-7bdf3516a055
             - name: AAD_CLIEN_SECRET
-              value: xxxxx~xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+              value: ~OE7Q~QARP.khAeplo9a2FYto42Y-gPpCqYH9
             - name: AAD_TENANT_ID
-              value: xxxxxxxX-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+              value: 695e64b5-2d13-4ea8-bb11-a6fda2d60c41
             - name: AAD_CALLBACK_URL
               # domain name of aad-proxy
-              value: https://aad.mac-blog.org.ua/callback
+              value: https://aad.cub.marchenko.net.ua/callback
             - name: AAD_COOKIE_DOMAIN
               # put partent domain name here
-              value: mac-blog.org.ua
+              value: cub.marchenko.net.ua
             - name: AAD_COOKIE_NAME
               value: aad
           ports:
@@ -68,6 +75,7 @@ kind: Ingress
 metadata:
   name: aad-proxy
   annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
     # IMPORTANT - azure gives us really big cookies which wont fit into default ingress configs
     # -----------------------------------------------------------------------------------------
     # Fix for: WARNING: Multiple cookies are required for this session as it exceeds the 4kb cookie limit. Please use server side session storage (eg. Redis) instead.
@@ -75,8 +83,12 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-buffer-size: "8k"
     nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
 spec:
+  tls:
+  - hosts:
+    - aad.cub.marchenko.net.ua
+    secretName: aad-proxy-tls
   rules:
-    - host: aad.mac-blog.org.ua
+    - host: aad.cub.marchenko.net.ua
       http:
         paths:
           - pathType: ImplementationSpecific
@@ -86,6 +98,13 @@ spec:
                 name: aad-proxy
                 port:
                   number: 80
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app1-tls
+# Placeholder, used only for further kubectl delete -f kube.yml to delete secret also
+type: Opaque
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -129,15 +148,19 @@ kind: Ingress
 metadata:
   name: app1
   annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
     # domain name of aad-proxy
-    nginx.ingress.kubernetes.io/auth-url: "https://aad.mac-blog.org.ua/check"
-    nginx.ingress.kubernetes.io/auth-signin: "https://aad.mac-blog.org.ua/login"
+    nginx.ingress.kubernetes.io/auth-url: "https://aad.cub.marchenko.net.ua/check"
+    nginx.ingress.kubernetes.io/auth-signin: "https://aad.cub.marchenko.net.ua/login"
     # `$cookie_aad`, where `aad` is a cookie name passed via `AAD_COOKIE_NAME` env
     nginx.ingress.kubernetes.io/auth-cache-key: $cookie_aad
 spec:
+  tls:
+  - hosts:
+    - app1.cub.marchenko.net.ua
+    secretName: app1-tls
   rules:
-    # domain of app that will be protected
-    - host: app1.mac-blog.org.ua
+    - host: app1.cub.marchenko.net.ua
       http:
         paths:
           - pathType: ImplementationSpecific
