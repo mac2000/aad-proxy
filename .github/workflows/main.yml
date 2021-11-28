@@ -1,0 +1,31 @@
+name: main
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+    - name: git clone
+      uses: actions/checkout@v2
+
+    - name: docker build
+      run: docker build -t aad-proxy .
+    
+    - name: docker push
+      if: github.ref == 'refs/heads/main'
+      run: |
+        echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u mac2000 --password-stdin
+        docker tag aad-proxy mac2000/aad-proxy
+        docker push mac2000/aad-proxy
+
+    - name: docker push ghcr.io
+      if: github.ref == 'refs/heads/main'
+      run: |
+        echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u mac2000 --password-stdin
+        docker tag aad-proxy ghcr.io/mac2000/aad-proxy
+        docker push ghcr.io/mac2000/aad-proxy

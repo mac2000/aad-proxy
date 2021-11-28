@@ -1,0 +1,40 @@
+@media (prefers-color-scheme: dark) {
+    html, body {
+        background-color: #333;
+        color: #eee;
+    }
+    main {
+        background: #444;
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    html, body {
+        background-color: #eee;
+        color: #333;
+    }
+    main {
+        background: #ddd;
+    }
+}
+
+html, body {
+    font-family: sans-serif;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    min-height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+h1 {
+    font-size: 1.25em;
+    margin: 0.5em 0;
+}
+
+main {
+    padding: 1em 1.5em;
+}

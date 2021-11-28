@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>aad-proxy</title>
+    <link rel="stylesheet" href="resources/styles.css">
+</head>
+<body>
+    <main>
+        <table>
+            <tr>
+                <td rowspan="3" valign="top" style="padding-right: 1em"><img src="resources/aad.svg" alt="aad" width="48" /></td>
+                <td><h1>Azure Active Directory</h1></td>
+            </tr>
+            <tr>
+                <td>{{ .Error }}</td>
+            </tr>
+            <tr>
+                <td style="padding-top: 0.8em">
+                    <form method="get" action="/login">
+                        <input type="submit" value="Login" />
+                    </form>
+                </td>
+            </tr>
+        </table>
+    </main>
+</body>
+</html>
