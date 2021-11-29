@@ -1,4 +1,4 @@
-module github.com/mac2000/oidc-proxy
+module github.com/mac2000/aad-proxy
 
 go 1.17
 
