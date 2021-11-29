@@ -204,3 +204,63 @@ All configuration options are required and passed as environment variables
 | `AAD_COOKIE_DOMAIN` | domain to which cookie will be set, for local setup it might be `localhost`, for production it should be parent domain, e.g. `contoso.com`, it is required for cookie to be "visible" on all subdomains |
 | `AAD_COOKIE_NAME` | name of the cookie, something like `aad` will be fine |
 
+**Optional headers options**
+
+Underneath protected app will also receive set of headers identifying user, which can also be configured
+
+| name | default | description |
+| ---- | ------- | ----------- |
+| `AAD_HEADER_ID` | `X-AAD-ID` | will contain token subject |
+| `AAD_HEADER_NAME` | `X-AAD-NAME` | user full name |
+| `AAD_HEADER_USERNAME` | `X-AAD-USERNAME` | username, extracted from email |
+| `AAD_HEADER_EMAIL` | `X-AAD-EMAIL` | user email |
+| `AAD_HEADER_ROLES` | `X-AAD-ROLES` | comma separated list of user roles |
+
+**Optional role map**
+
+Some apps, like Grafana, expecting single header with a single role, imagine that in our Azure application there are `Admins` and `Writers` roles, and we want to map them to Grafanas `Admin` and `Editor`, to do so, pass following parameters:
+
+
+| name | default | description |
+| ---- | ------- | ----------- |
+| `AAD_HEADER_ROLE` | `X-AAD-ROLE` | header which will contain found role if any |
+| `AAD_HEADER_ROLE_MAP` | `""` | comma separated list of role pair, aka: `Writers:Editor, Admins:Admin` |
+
+Whenever proxy will receive request it will loop via all user roles trying to find desired role in map and will pass last found one as a role header
+
+So in grafana you can use something like: `-e GF_AUTH_PROXY_HEADERS="Name:X-AAD-NAME Email:X-AAD-EMAIL Role:X-AAD-ROLE"` and any user who has `Writers` role will automatically receive `Editor` role in grafana
+
+## Notes
+
+Azure id_token example:
+
+```json
+{
+  "aud": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx",
+  "iss": "https://sts.windows.net/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx/",
+  "iat": 1638212393,
+  "nbf": 1638212393,
+  "exp": 1638216293,
+  "amr": [
+    "pwd",
+    "mfa"
+  ],
+  "family_name": "Marchenko",
+  "given_name": "Alexandr",
+  "ipaddr": "168.140.34.181",
+  "name": "Alexandr Marchenko",
+  "nonce": "xxxxxxxxx",
+  "oid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx",
+  "onprem_sid": "S-1-5-21-xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxx",
+  "rh": "xxxxxxxxx",
+  "roles": [
+    "Writers"
+  ],
+  "sub": "xxxxxxxxx_xxxxxxxxxxxxxxxxxx",
+  "tid": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx",
+  "unique_name": "AlexandrM@rabota.ua",
+  "upn": "AlexandrM@rabota.ua",
+  "uti": "xxxxxxxxx",
+  "ver": "1.0"
+}
+```

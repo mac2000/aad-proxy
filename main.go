@@ -46,6 +46,48 @@ func main() {
 	cookieDomain := os.Getenv("AAD_COOKIE_DOMAIN")
 	cookieName := os.Getenv("AAD_COOKIE_NAME")
 
+	headerId := os.Getenv("AAD_HEADER_ID")
+	if headerId == "" {
+		headerId = "X-AAD-ID"
+	}
+	headerName := os.Getenv("AAD_HEADER_NAME")
+	if headerName == "" {
+		headerName = "X-AAD-NAME"
+	}
+	headerUsername := os.Getenv("AAD_HEADER_USERNAME")
+	if headerUsername == "" {
+		headerUsername = "X-AAD-USERNAME"
+	}
+	headerEmail := os.Getenv("AAD_HEADER_EMAIL")
+	if headerEmail == "" {
+		headerEmail = "X-AAD-EMAIL"
+	}
+	headerRoles := os.Getenv("AAD_HEADER_ROLES")
+	if headerRoles == "" {
+		headerRoles = "X-AAD-ROLES"
+	}
+
+	headerRole := os.Getenv("AAD_HEADER_ROLE")
+	if headerRole == "" {
+		headerRole = "X-AAD-ROLE"
+	}
+	headerRoleMap := os.Getenv("AAD_HEADER_ROLE_MAP")
+	keys := []string{}
+	vals := []string{}
+	if headerRoleMap != "" {
+		for _, kvp := range strings.Split(headerRoleMap, ",") {
+			kvp = strings.Trim(kvp, " ")
+			kv := strings.Split(kvp, ":")
+			key := strings.Trim(kv[0], " ")
+			val := strings.Trim(kv[1], " ")
+			keys = append(keys, key)
+			vals = append(vals, val)
+		}
+		if len(keys) != len(vals) {
+			log.Fatal().Str("headerRoleMap", headerRoleMap).Strs("keys", keys).Strs("vals", vals).Msg("unexpected number of key value pairs in role map")
+		}
+	}
+
 	if cookieDomain != "" && cookieDomain != "localhost" {
 		cookieDomain = "." + cookieDomain
 	}
@@ -133,7 +175,28 @@ func main() {
 
 		user := User{}
 		idToken.Claims(&user)
-		log.Info().Str("handler", "check").Str("id", user.ID).Str("email", user.Email).Str("name", user.Name).Msg("success")
+		email := strings.ToLower(user.Email)
+		w.Header().Set(headerId, user.ID)
+		w.Header().Set(headerName, user.Name)
+		w.Header().Set(headerUsername, email[:strings.Index(email, "@")])
+		w.Header().Set(headerEmail, email)
+		w.Header().Set(headerRoles, strings.Join(user.Roles[:], ","))
+		if len(keys) > 0 && len(vals) > 0 {
+			v := ""
+			for ki, k := range keys {
+				for _, r := range user.Roles {
+					if k == r {
+						v = vals[ki]
+					}
+				}
+			}
+			if v != "" {
+				w.Header().Set(headerRole, v)
+			}
+			log.Info().Str("handler", "check").Str("id", user.ID).Str("email", user.Email).Str("name", user.Name).Strs("roles", user.Roles).Str("role", v).Msg("success")
+		} else {
+			log.Info().Str("handler", "check").Str("id", user.ID).Str("email", user.Email).Str("name", user.Name).Strs("roles", user.Roles).Msg("success")
+		}
 		fmt.Fprintf(w, "OK")
 	})
 
