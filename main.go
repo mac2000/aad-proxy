@@ -39,7 +39,7 @@ func main() {
 
 	ctx := context.Background()
 
-	tenantId := os.Getenv("AAD_TENANT_ID")
+	tenantID := os.Getenv("AAD_TENANT_ID")
 	clientId := os.Getenv("AAD_CLIENT_ID")
 	clientSecret := os.Getenv("AAD_CLIEN_SECRET")
 	callbackURL := os.Getenv("AAD_CALLBACK_URL")
@@ -92,8 +92,8 @@ func main() {
 		cookieDomain = "." + cookieDomain
 	}
 
-	log.Info().Str("tenantId", tenantId).Str("clientId", clientId).Str("clientSecret", maskClientSecret(clientSecret, 3)).Str("callbackUrl", callbackURL).Str("cookieDomain", cookieDomain).Msg("environment variables")
-	if tenantId == "" {
+	log.Info().Str("tenantID", tenantID).Str("clientId", clientId).Str("clientSecret", maskClientSecret(clientSecret, 3)).Str("callbackUrl", callbackURL).Str("cookieDomain", cookieDomain).Msg("environment variables")
+	if tenantID == "" {
 		log.Fatal().Msg("tenant id missing, pass it via AAD_TENANT_ID environment variable, receive it from app registration overview page, it is called \"Directory (tenant) ID\"")
 	}
 	if clientId == "" {
@@ -112,7 +112,7 @@ func main() {
 		log.Fatal().Msg("cookie name missing, pass it via AAD_COOKIE_NAME environment variable, should be something like \"aad\"")
 	}
 
-	provider, err := oidc.NewProvider(ctx, fmt.Sprintf("https://sts.windows.net/%s/", tenantId))
+	provider, err := oidc.NewProvider(ctx, fmt.Sprintf("https://sts.windows.net/%s/", tenantID))
 	if err != nil {
 		log.Fatal().Err(err).Msg("unable to create odic provider")
 	}
